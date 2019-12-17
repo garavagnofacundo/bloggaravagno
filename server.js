@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const router = require('./routes/index');
 
 //confing vars
-const port = 3000; //puerto al que se conecta
+const port = process.env.PORT || 3000; //puerto al que se conecta
 const db = process.env.MONGODB_URI || 'mongodb://localhost/blog35'; // como se conecta a la base de datos
 
 //db connection
