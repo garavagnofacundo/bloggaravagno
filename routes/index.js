@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
+const Comment = require('../models/Comment');
+const mongoose = require('mongoose');
 
 router.get('/', (req, res) => {
   Post.find().exec((err, posts) => {
@@ -10,6 +12,22 @@ router.get('/', (req, res) => {
 
 router.get('/newpost', (req, res) => {
   res.render('newpost');
+});
+
+router.post('/newcomment', (req, res) => {
+  const comment = new Comment({
+    _id: new mongoose.Types.ObjectId(),
+    author: req.body.author,
+    content: req.body.content
+  });
+  comment.save(err => {
+    Post.findById(req.body.postId).exec((err, post) => {
+      post.comments.push(comment._id);
+      post.save(err => {
+        res.redirect('/posts/' + req.body.postId);
+      });
+    });
+  });
 });
 
 router.post('/newpost', (req, res) => {
@@ -26,9 +44,11 @@ router.post('/newpost', (req, res) => {
 });
 
 router.get('/posts/:id', (req, res) => {
-  Post.findById(req.params.id).exec((err, post) => {
-    res.render('post', { post: post });
-  });
+  Post.findById(req.params.id)
+    .populate('comments')
+    .exec((err, post) => {
+      res.render('post', { post: post });
+    });
 });
 
 module.exports = router;
